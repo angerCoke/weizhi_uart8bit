@@ -1,0 +1,87 @@
+`timescale 1ns / 1ps
+
+module data_select(
+				data,
+				start,
+				dataA1O,
+				dataA2O,
+				dataB1O,
+				dataB2O,
+				dataC1O,
+				dataC2O,
+				jiaoyan,
+				start1
+);
+
+input[7:0] data;
+input start;
+output reg[10:0]  dataA1O,dataA2O,dataB1O,dataB2O,dataC1O,dataC2O;
+output [7:0] jiaoyan;
+output reg start1;
+reg [10:0] dataA1,dataA2,dataB1,dataB2,dataC1,dataC2;
+
+reg[2:0] flag_angle;
+reg change;
+
+assign jiaoyan[0] = dataA1O[0] ^dataA1O[1] ^dataA1O[2] ^dataA1O[3] ^dataA1O[4] ^dataA1O[5] ^dataA1O[6] ^dataA1O[7] ^dataA1O[8] ^dataA1O[9]^dataA1O[10] ;
+assign jiaoyan[1] = dataA2O[0] ^dataA2O[1] ^dataA2O[2] ^dataA2O[3] ^dataA2O[4] ^dataA2O[5] ^dataA2O[6] ^dataA2O[7] ^dataA2O[8] ^dataA2O[9] ^dataA2O[10] ;
+assign jiaoyan[2] = dataB1O[0] ^dataB1O[1] ^dataB1O[2] ^dataB1O[3] ^dataB1O[4] ^dataB1O[5] ^dataB1O[6] ^dataB1O[7] ^dataB1O[8] ^dataB1O[9] ^dataB1O[10];
+assign jiaoyan[3] = dataB2O[0] ^dataB2O[1] ^dataB2O[2] ^dataB2O[3] ^dataB2O[4] ^dataB2O[5] ^dataB2O[6] ^dataB2O[7] ^dataB2O[8] ^dataB2O[9] ^dataB2O[10];
+assign jiaoyan[4] = dataC1O[0] ^dataC1O[1] ^dataC1O[2] ^dataC1O[3] ^dataC1O[4] ^dataC1O[5] ^dataC1O[6] ^dataC1O[7] ^dataC1O[8] ^dataC1O[9] ^dataC1O[10];
+assign jiaoyan[5] = dataC2O[0] ^dataC2O[1] ^dataC2O[2] ^dataC2O[3] ^dataC2O[4] ^dataC2O[5] ^dataC2O[6] ^dataC2O[7] ^dataC2O[8] ^dataC2O[9] ^dataC2O[10];
+assign jiaoyan[6] = 0;
+assign jiaoyan[7] = 1;
+
+always@ (negedge start)
+begin
+	case(data[7:6])
+		2'b00:
+			begin
+				flag_angle <= data[2:0];
+				change <= 0;
+				start1 <= 1;
+			end
+		2'b01:
+			begin
+				case(flag_angle)
+					3'b001:dataA1[5:0] <= data[5:0];
+					3'b010:dataA2[5:0] <= data[5:0];
+					3'b011:dataB1[5:0] <= data[5:0];
+					3'b100:dataB2[5:0] <= data[5:0];
+					3'b101:dataC1[5:0] <= data[5:0];
+					3'b110:dataC2[5:0] <= data[5:0];
+				endcase
+			end
+		2'b10:
+			begin
+				case(flag_angle)
+					3'b001:dataA1[10:6] <= data[4:0];
+					3'b010:dataA2[10:6] <= data[4:0];
+					3'b011:dataB1[10:6] <= data[4:0];
+					3'b100:dataB2[10:6] <= data[4:0];
+					3'b101:dataC1[10:6] <= data[4:0];
+					3'b110:dataC2[10:6] <= data[4:0];
+				endcase
+			end
+		2'b11: 
+			begin
+				case(data[5:0])
+					6'b000000:change <= 1;
+					6'b000001:start1<=0;
+				endcase
+			end
+			
+		endcase
+end
+
+always@(posedge change)
+begin
+	dataA1O<=dataA1;
+	dataA2O<=dataA2;
+	dataB1O<=dataB1;
+	dataB2O<=dataB2;
+	dataC1O<=dataC1;
+	dataC2O<=dataC2;
+end
+
+endmodule
